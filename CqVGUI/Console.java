@@ -1,3 +1,6 @@
+// Package Declaration
+package CqVGUI;
+
 // Imported Packages
 import javax.swing.*;
 import javax.swing.text.*;
