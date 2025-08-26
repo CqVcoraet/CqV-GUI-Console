@@ -17,6 +17,8 @@ public class Console extends JFrame {
     static int lineNum = 0;
     static final String WARN_COLOR = "#FFC900";
     static final String ERROR_COLOR = "#D40000";
+    static final int INIT_WIDTH = 700;
+    static final int INIT_HEIGHT = 650;
 
     // Singleton to ensure one instance
     public static Console getInstance() {
@@ -28,7 +30,7 @@ public class Console extends JFrame {
 
     private Console(String title) {
         super(title);
-        setSize(700, 650);
+        setSize(INIT_WIDTH, INIT_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(Color.BLACK);
