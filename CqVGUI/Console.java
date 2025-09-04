@@ -7,6 +7,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import CustomFonts.*;
 
 public class Console extends JFrame {
     private static Console instance;
@@ -17,6 +18,7 @@ public class Console extends JFrame {
     static int lineNum = 0;
     static final String WARN_COLOR = "#FFC900";
     static final String ERROR_COLOR = "#D40000";
+    private static boolean inverted = false;
     static final int INIT_WIDTH = 700;
     static final int INIT_HEIGHT = 650;
 
@@ -33,16 +35,25 @@ public class Console extends JFrame {
         setSize(INIT_WIDTH, INIT_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(Color.BLACK);
+        setResizable(true);
+        if (inverted) {
+            getContentPane().setBackground(Color.WHITE);
+        } else {
+            getContentPane().setBackground(Color.BLACK);
+        }
 
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setBackground(Color.BLACK);
-        textPane.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textPane.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 
         doc = textPane.getStyledDocument();
         defaultStyle = textPane.addStyle("default", null);
-        StyleConstants.setForeground(defaultStyle, Color.WHITE);
+        if (inverted) {
+            StyleConstants.setForeground(defaultStyle, Color.BLACK);
+        } else {
+            StyleConstants.setForeground(defaultStyle, Color.WHITE);
+        }
 
         warningStyle = textPane.addStyle("warning", null);
         StyleConstants.setForeground(warningStyle, Color.decode("#FFC900"));
@@ -60,16 +71,32 @@ public class Console extends JFrame {
         setLocation(x, y);
 
         JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Options");
+        JMenu options = new JMenu("Options");
         JMenuItem about = new JMenuItem("About");
         JMenuItem clear = new JMenuItem("Clear");
-        menu.add(about);
-        menu.add(clear);
+        JMenuItem smartInvert = new JMenuItem("Smart Invert");
+        JMenuItem returnToDefault = new JMenuItem("Return to Default");
+        options.add(about);
+        options.add(clear);
+        options.add(smartInvert);
+        options.add(returnToDefault);
+        options.setFont(Inter.getInterBoldFont(15));
+        setMenuItemFont(options, Inter.getInterRegularFont(10));
         about.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Glass Bridge Game\nVersion 0.0\nBuild 0\nCreated by Uddi.java", "About", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "CqV GUI Console\nVersion 1.1\nBuild 2\nCreated by Uddi.java", "About", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        menuBar.add(menu);
+        smartInvert.addActionListener(e -> {
+            inverted = true;
+            textPane.updateUI();
+        });
+
+        returnToDefault.addActionListener(e -> {
+            inverted = false;
+            textPane.updateUI();
+        });
+
+        menuBar.add(options);
         setJMenuBar(menuBar);
         clear.addActionListener(e -> {
             int result = JOptionPane.showOptionDialog(null, "Are you sure you want to clear the console?", "Clear Console",
@@ -122,6 +149,45 @@ public class Console extends JFrame {
         System.err.println("GUI Console ERRORLN: " + text);
     }
 
+    public static void printf(String format, Object... args) {
+        try {
+            String formatted = String.format(format, args);
+            getInstance().appendText(formatted, defaultStyle);
+            System.out.print("GUI Console PRINTF: " + formatted);
+        } catch (Exception e) {
+            Console.errprintln("Error: " + e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                Console.errprintln("    at " + ste);
+            }
+        }
+    }
+
+    public static void warnprintf(String format, Object... args) {
+        try {
+            String formatted = String.format(format, args);
+            getInstance().appendText(formatted, warningStyle);
+            System.out.print("GUI Console WARNF: " + formatted);
+        } catch (Exception e) {
+            Console.errprintln("Error: " + e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                Console.errprintln("    at " + ste);
+            }
+        }
+    }
+
+    public static void errprintf(String format, Object... args) {
+        try {
+            String formatted = String.format(format, args);
+            getInstance().appendText(formatted, errorStyle);
+            System.err.print("GUI Console ERRORF: " + formatted);
+        } catch (Exception e) {
+            Console.errprintln("Error: " + e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                Console.errprintln("    at " + ste);
+            }
+        }
+    }
+
     public static void spacer() {
         getInstance().appendText("\n", defaultStyle);
     }
@@ -141,5 +207,34 @@ public class Console extends JFrame {
         Console console = getInstance(); // Ensure the instance exists
         isVisible = !isVisible;
         console.setVisible(isVisible);
+    }
+
+    public static void setMenuFont(JMenuBar menuBar, Font font) {
+        menuBar.setFont(font); // Set font for the menu bar itself
+        for (MenuElement menuElement : menuBar.getSubElements()) {
+            if (menuElement.getComponent() instanceof JMenu) {
+                JMenu menu = (JMenu) menuElement.getComponent();
+                menu.setFont(font); // Set font for JMenu
+                setMenuItemFont(menu, font); // Recursively set font for all items in the menu
+            }
+        }
+    }
+    
+    public static void setMenuItemFont(JMenu menu, Font font) {
+        for (MenuElement menuElement : menu.getSubElements()) {
+            if (menuElement.getComponent() instanceof JMenuItem) {
+                JMenuItem menuItem = (JMenuItem) menuElement.getComponent();
+                menuItem.setFont(font); // Set font for each JMenuItem
+            }
+        }
+    }
+
+    public static void setMenuBarItemFont(JMenuBar menuBar, Font font) {
+        for (MenuElement menuElement : menuBar.getSubElements()) {
+            if (menuElement.getComponent() instanceof JMenuItem) {
+                JMenuItem menuItem = (JMenuItem) menuElement.getComponent();
+                menuItem.setFont(font); // Set font for each JMenuItem directly in the menu bar
+            }
+        }
     }
 }
