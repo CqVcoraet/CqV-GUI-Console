@@ -2,10 +2,10 @@
 package CqVGUI;
 
 // Imported Packages
+import CustomFonts.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import CustomFonts.*;
 import java.io.File;
 import java.io.IOException;
 
