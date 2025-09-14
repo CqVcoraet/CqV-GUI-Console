@@ -5,11 +5,12 @@ package CqVGUI;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+import CustomFonts.*;
 import java.io.File;
 import java.io.IOException;
-import CustomFonts.*;
 
 public class Console extends JFrame {
+    private static final boolean isHeadless = java.awt.GraphicsEnvironment.isHeadless();
     private static Console instance;
     private JTextPane textPane;
     private static boolean isVisible;
@@ -24,6 +25,9 @@ public class Console extends JFrame {
 
     // Singleton to ensure one instance
     public static Console getInstance() {
+        if (isHeadless) {
+            return null;
+        }
         if (instance == null) {
             instance = new Console("Console");
         }
@@ -32,6 +36,8 @@ public class Console extends JFrame {
 
     private Console(String title) {
         super(title);
+        if (isHeadless) return;
+        // ...existing GUI initialization code...
         setSize(INIT_WIDTH, INIT_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -106,10 +112,14 @@ public class Console extends JFrame {
             }
         });
 
-        setVisible(true);
+        setVisible(false);
     }
 
     public static void print(Object text) {
+        if (isHeadless) {
+            System.out.print(text);
+            return;
+        }
         try {
             getInstance().appendText(String.valueOf(text), defaultStyle);
             System.out.print("GUI Console PRINT: " + text);
@@ -120,16 +130,28 @@ public class Console extends JFrame {
     }
 
     public static void warnprint(Object text) {
+        if (isHeadless) {
+            System.out.print(text);
+            return;
+        }
         getInstance().appendText(String.valueOf(text), warningStyle);
         System.out.print("GUI Console WARN: " + text);
     }
 
     public static void errprint(Object text) {
+        if (isHeadless) {
+            System.err.print(text);
+            return;
+        }
         getInstance().appendText(String.valueOf(text), errorStyle);
         System.err.print("GUI Console ERROR: " + text);
     }
     
     public static void println(Object text) {
+        if (isHeadless) {
+            System.out.println(text);
+            return;
+        }
         try {
             getInstance().appendText(String.valueOf(text) + "\n", defaultStyle);
             System.out.println("GUI Console PRINTLN: " + text);
@@ -140,16 +162,28 @@ public class Console extends JFrame {
     }
 
     public static void warnprintln(Object text) {
+        if (isHeadless) {
+            System.out.println(text);
+            return;
+        }
         getInstance().appendText(String.valueOf(text) + "\n", warningStyle);
         System.out.println("GUI Console WARNLN: " + text);
     }
     
     public static void errprintln(Object text) {
+        if (isHeadless) {
+            System.err.println(text);
+            return;
+        }
         getInstance().appendText(String.valueOf(text) + "\n", errorStyle);
         System.err.println("GUI Console ERRORLN: " + text);
     }
 
     public static void printf(String format, Object... args) {
+        if (isHeadless) {
+            System.out.print(String.format(format, args));
+            return;
+        }
         try {
             String formatted = String.format(format, args);
             getInstance().appendText(formatted, defaultStyle);
@@ -163,6 +197,10 @@ public class Console extends JFrame {
     }
 
     public static void warnprintf(String format, Object... args) {
+        if (isHeadless) {
+            System.out.print(String.format(format, args));
+            return;
+        }
         try {
             String formatted = String.format(format, args);
             getInstance().appendText(formatted, warningStyle);
@@ -176,6 +214,10 @@ public class Console extends JFrame {
     }
 
     public static void errprintf(String format, Object... args) {
+        if (isHeadless) {
+            System.err.print(String.format(format, args));
+            return;
+        }
         try {
             String formatted = String.format(format, args);
             getInstance().appendText(formatted, errorStyle);
@@ -189,10 +231,15 @@ public class Console extends JFrame {
     }
 
     public static void spacer() {
+        if (isHeadless) {
+            System.out.println();
+            return;
+        }
         getInstance().appendText("\n", defaultStyle);
     }
 
     private void appendText(String text, Style style) {
+        if (isHeadless) return;
         SwingUtilities.invokeLater(() -> {
             try {
                 doc.insertString(doc.getLength(), text, style);
@@ -204,6 +251,7 @@ public class Console extends JFrame {
     }
 
     public static void toggleVisibility() {
+        if (isHeadless) return;
         Console console = getInstance(); // Ensure the instance exists
         isVisible = !isVisible;
         console.setVisible(isVisible);
